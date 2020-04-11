@@ -220,7 +220,7 @@ def venues_id_get(venue_id):
     
     shows_before = list(filter(lambda x: x.start_time < datetime.datetime.now(), shows))
     shows_coming = list(filter(lambda x: x.start_time > datetime.datetime.now(), shows))
-    print(f"shows {len(shows)}, before {len(shows_before)}, after {len(shows_coming)}")
+    # print(f"shows {len(shows)}, before {len(shows_before)}, after {len(shows_coming)}")
     past_shows = [show.short() for show in shows_before]
     upcoming_shows = [show.short() for show in shows_coming]
     
@@ -244,19 +244,21 @@ def venues_create_post():
     # TODO: insert form data as a new Venue record in the db, instead
     # TODO: modify data to be the data object returned from db insertion
     try:
-        name = request.form.get('name', '')
-        city = request.form.get('city', '')
-        state = request.form.get('state', '')
-        address = request.form.get('address', '')
-        phone = request.form.get('phone', '')
-        genres = request.form.getlist('genres')
-        facebook_link = request.form.get('facebook_link', '')
-        venue = Venue(name=name, city=city, state=state, address=address, phone=phone, genres=genres,
-                      facebook_link=facebook_link)
+        form = VenueForm(request.form)
+        if form.validate():
+            name = request.form.get('name', '')
+            city = request.form.get('city', '')
+            state = request.form.get('state', '')
+            address = request.form.get('address', '')
+            phone = request.form.get('phone', '')
+            genres = request.form.getlist('genres')
+            facebook_link = request.form.get('facebook_link', '')
+            venue = Venue(name=name, city=city, state=state, address=address, phone=phone, genres=genres,
+                        facebook_link=facebook_link)
 
-
-        db.session.add(venue)
-        db.session.commit()
+            venue.insert()
+        # db.session.add(venue)
+        # db.session.commit()
 
         # on successful db insert, flash success
         flash('Venue ' + request.form['name'] + ' was successfully listed!')
@@ -368,7 +370,7 @@ def artists_edit_post(artist_id):
     # TODO: take values from the form submitted, and update existing
     # artist record with ID <artist_id> using the new attributes
 
-    return redirect(url_for('show_artist', artist_id=artist_id))
+    return redirect(url_for('artists_id_get', artist_id=artist_id))
 
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
@@ -398,7 +400,26 @@ def venues_edit_get(venue_id):
 def venues_edit_post(venue_id):
     # TODO: take values from the form submitted, and update existing
     # venue record with ID <venue_id> using the new attributes
-    return redirect(url_for('show_venue', venue_id=venue_id))
+    # try:
+    form = VenueForm(request.form)
+    print(f'the result of form validate is {form.validate()} and its err is {form.errors }')
+    if form.validate():
+        v = Venue.query.filter(Venue.id == venue_id).one_or_none()
+        print("update aw3")
+        v.update(form)
+        print("update suu")
+        # on successful db insert, flash success
+        flash('Venue ' + request.form['name'] + ' was successfully updated!')
+        return redirect(url_for('venues_id_get', venue_id=venue_id))
+    else:
+        flash('Venue ' + request.form['name'] + ' was not updated!')
+        return redirect(url_for('venues_edit_get', venue_id=venue_id))
+
+    # except:
+    #     db.session.rollback()
+    #     flash('An error occurred. Venue ' + request.form['name'] + ' could not be updated.')
+
+    
 
 
 #  Create Artist
@@ -426,9 +447,9 @@ def artists_create_post():
         image_link = form.image_link.data
 
         artist = Artist(name=name, city=city, state=state, phone=phone, genres=genres, facebook_link=facebook_link, image_link=image_link)
-        print(artist.long())
-        db.session.add(artist)
-        db.session.commit()
+        artist.insert()
+        # db.session.add(artist)
+        # db.session.commit()
         flash('Artist ' + form.name.data + ' was successfully listed!')
     else:
         print(form.errors)

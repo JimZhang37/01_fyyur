@@ -82,7 +82,8 @@ class Venue(db.Model):
         "facebook_link": self.facebook_link,
         "seeking_venue": True,
         "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
-        "image_link": self.image_link
+        "image_link": self.image_link,
+        "address": self.address
 
     }
 
@@ -97,6 +98,25 @@ class Venue(db.Model):
         shows = self.shows_at_venue
         comingshowslist = list(filter(lambda x: x.start_time > datetime.datetime.now(), shows))
         return len(comingshowslist)
+
+    def update(self, form):
+        self.name = form.name.data
+        self.genres = list(form.genres.data)
+        print(self.genres)
+        self.address = form.address.data
+        self.city = form.city.data
+        self.state = form.state.data
+        self.phone = form.phone.data
+        #self.website = form.website.data
+        self.facebook_link = form.facebook_link.data
+        #self.seeking_talent = form.seeking_talent.data
+        #self.seeking_description = form.seeking_description.data
+        #self.image_link = form.image_link.data
+        db.session.commit()
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
 
 class Artist(db.Model):
     __tablename__ = 'Artist'
@@ -147,4 +167,9 @@ class Artist(db.Model):
         comingshowslist = list(filter(lambda x: x.start_time > datetime.datetime.now(), shows))
         return len(comingshowslist)
         
+    def update(self):
+        db.session.commit()
 
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
