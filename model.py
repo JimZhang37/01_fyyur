@@ -167,8 +167,21 @@ class Artist(db.Model):
         comingshowslist = list(filter(lambda x: x.start_time > datetime.datetime.now(), shows))
         return len(comingshowslist)
         
-    def update(self):
+    def update(self, form):
+        self.name = form.name.data
+        self.genres = list(form.genres.data)
+        print(self.genres)
+        #self.address = form.address.data
+        self.city = form.city.data
+        self.state = form.state.data
+        self.phone = form.phone.data
+        #self.website = form.website.data
+        self.facebook_link = form.facebook_link.data
+        #self.seeking_talent = form.seeking_talent.data
+        #self.seeking_description = form.seeking_description.data
+        self.image_link = form.image_link.data
         db.session.commit()
+
 
     def insert(self):
         db.session.add(self)

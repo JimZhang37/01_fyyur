@@ -369,8 +369,14 @@ def artists_edit_get(artist_id):
 def artists_edit_post(artist_id):
     # TODO: take values from the form submitted, and update existing
     # artist record with ID <artist_id> using the new attributes
-
-    return redirect(url_for('artists_id_get', artist_id=artist_id))
+    form = ArtistForm(request.form)
+    if form.validate():
+        artist = Artist.query.filter(Artist.id == artist_id).one_or_none()
+        artist.update(form)
+        return redirect(url_for('artists_id_get', artist_id=artist_id))
+    else:
+        flash('Artist ' + request.form['name'] + ' was not updated!')
+        return redirect(url_for('artists_edit_get', venue_id=artist_id))
 
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
@@ -402,12 +408,9 @@ def venues_edit_post(venue_id):
     # venue record with ID <venue_id> using the new attributes
     # try:
     form = VenueForm(request.form)
-    print(f'the result of form validate is {form.validate()} and its err is {form.errors }')
     if form.validate():
         v = Venue.query.filter(Venue.id == venue_id).one_or_none()
-        print("update aw3")
         v.update(form)
-        print("update suu")
         # on successful db insert, flash success
         flash('Venue ' + request.form['name'] + ' was successfully updated!')
         return redirect(url_for('venues_id_get', venue_id=venue_id))
@@ -512,14 +515,14 @@ def shows():
 
 
 @app.route('/shows/create')
-def shows_get_create():
+def shows_create_get():
     # renders form. do not touch.
     form = ShowForm()
     return render_template('forms/new_show.html', form=form)
 
 
 @app.route('/shows/create', methods=['POST'])
-def show_post_create():
+def shows_create_post():
     # called to create new shows in the db, upon submitting new show listing form
     # TODO: insert form data as a new Show record in the db, instead
     try:
