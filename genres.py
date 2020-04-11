@@ -28,9 +28,9 @@ class Genres(Enum):
         return [(choice.value, choice.value) for choice in cls]
     @classmethod
     def a(cls, form, field):
-        x = [e.value for e in cls]
-        print(x)
+        # x = [e.value for e in cls]
+        # print(x)
         for i in field.data:
-            print(i)
+            # print(i)
             if i not in [e.value for e in cls]:
                 raise ValidationError(f'{i} is not in the enum')

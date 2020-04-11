@@ -1,5 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from sqlalchemy.types import PickleType
+import datetime
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -45,7 +47,7 @@ class Venue(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    genres = db.Column(db.ARRAY(db.String))
+    genres = db.Column(PickleType)
     
     address = db.Column(db.String(120))
     city = db.Column(db.String(120))
@@ -64,7 +66,8 @@ class Venue(db.Model):
     def short(self):
         return {
             'id': self.id,
-            'name': self.name
+            'name': self.name,
+            'num_upcoming_shows': self.num_upcoming_shows()
         }
 
     def long(self):
@@ -90,12 +93,17 @@ class Venue(db.Model):
             'num_upcoming_shows': len(self.show)
         }
 
+    def num_upcoming_shows(self):
+        shows = self.shows_at_venue
+        comingshowslist = list(filter(lambda x: x.start_time > datetime.datetime.now(), shows))
+        return len(comingshowslist)
+
 class Artist(db.Model):
     __tablename__ = 'Artist'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    genres = db.Column(db.ARRAY(db.String))
+    genres = db.Column(PickleType)
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
     phone = db.Column(db.String(120))
@@ -111,7 +119,8 @@ class Artist(db.Model):
 
         return {
             'id': self.id,
-            'name': self.name
+            'name': self.name,
+            'num_upcoming_shows': self.num_upcoming_shows()
         }
     def long(self):
 
@@ -129,4 +138,13 @@ class Artist(db.Model):
         "image_link": self.image_link
 
     }
+
+    def num_upcoming_shows(self):
+        '''
+        provide input to short()
+        '''
+        shows = self.shows_of_artist
+        comingshowslist = list(filter(lambda x: x.start_time > datetime.datetime.now(), shows))
+        return len(comingshowslist)
+        
 
